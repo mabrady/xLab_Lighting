@@ -4,12 +4,17 @@
 // found at: http://github.com/adafruit/LPD8806
 // and their strips: http://www.adafruit.com/products/306
 // Released under the MIT License: http://mbed.org/license/mit
-
+//
+// standard connected to 1st hardware SPI
+// LPD8806  <> MBED
+// DATA     -> P5
+// CLOCK    -> p7
 /*****************************************************************************/
 
 #include "LPD8806.h"
 
 //Define SPI pins
+//Connected to first SPI module
 SPI spi(p5, p6, p7); // mosi, miso, sclk
 //SPI spi(p11, p12, p13); // mosi, miso, sclk
 
