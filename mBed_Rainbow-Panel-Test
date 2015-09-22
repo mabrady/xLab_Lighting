@@ -1,0 +1,39 @@
+//Rainbow sequence for all LEDs
+#include "mbed.h"
+#include "LPD8806.h"
+
+Serial pc(USBTX, USBRX);    // Serial communication for debugging purposes
+int nLEDs = 24; //Number of LEDs in the string
+
+LPD8806 strip = LPD8806(nLEDs);
+
+
+int main()
+{
+    int setup = 1;
+
+    int r=0;
+    int g=0;
+    int b=0;
+while(setup){
+    
+    strip.begin();
+    //Initialize empty strip
+    for(int z=0;z<nLEDs;z++){
+        strip.setPixelColor(z,r,g,b);
+    }
+    strip.show();
+    pc.baud(115200);
+    setup = 0;
+}
+while(1){    
+      for (int i=0; i<nLEDs;i++){
+        strip.setPixelColor(i,r,g,b);
+        r+=5;
+        g+=10;
+        b+=3;
+      }
+      strip.show(); //Sets the color values
+      wait(0.1);
+}
+}
