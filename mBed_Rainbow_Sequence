@@ -1,0 +1,77 @@
+//Rainbow sequence for all LEDs
+#include "mbed.h"
+#include "LPD8806.h"
+
+Serial pc(USBTX, USBRX);    // Serial communication for debugging purposes
+int nLEDs = 24; //Number of LEDs in the string
+
+LPD8806 strip = LPD8806(nLEDs);
+
+
+int main()
+{
+    int setup = 1;
+    int nextLoop = 0;
+
+    int r=0;
+    int g=0;
+    int b=0;
+while(setup){
+    
+    strip.begin();
+    //Initialize empty strip
+    for(int z=0;z<nLEDs;z++){
+        strip.setPixelColor(z,r,g,b);
+    }
+    strip.show();
+    pc.baud(115200);
+    setup = 0;
+}
+while(1){    
+    while(!nextLoop) {
+        if(r<255) {
+            r+=5;
+        }
+        if (r==255 && g<255){
+            g+=5;
+        }
+        if (g==255 && b<255){
+            b+=5;
+        }
+        if(b==255){
+            nextLoop = 1;
+        }
+      for (int i=0; i<nLEDs;i++){
+        strip.setPixelColor(i,r,g,b);
+        pc.printf("R=%d\n\r",r);
+        pc.printf("G=%d\n\r",g);
+        pc.printf("B=%d\n\r",b);
+      }
+      strip.show(); //Sets the color values
+      wait(0.1);
+    }
+    while(nextLoop) {
+        if(b>0) {
+            b-=5;
+        }
+        if (b==0 && g>0){
+            g-=5;
+        }
+        if (g==0 && r>0){
+            r-=5;
+        }
+        
+        if (r==0) {
+            nextLoop = 0;
+        }
+      for (int i=0; i<nLEDs;i++){
+        strip.setPixelColor(i,r,g,b);
+        pc.printf("R=%d\n\r",r);
+        pc.printf("G=%d\n\r",g);
+        pc.printf("B=%d\n\r",b);
+      }
+      strip.show(); //Sets the color values
+      wait(0.1);
+    }
+}
+}
