@@ -1,0 +1,138 @@
+//User inputs LED color and diode through serial port
+#include "mbed.h"
+#include "LPD8806.h"
+
+Serial pc(USBTX, USBRX);    // Serial communication for debugging purposes
+int nLEDs = 28; //Number of LEDs in the string
+int outKey; //Key pressed by the user (used to determine what LED to change color of
+int colors[3] = {0,0,0};
+
+LPD8806 strip = LPD8806(nLEDs);
+
+//Changes key presses into integeters
+int keyPresses (int var) {
+    switch(var){
+        case 13: //Enter key
+            return 13;
+        case 48:
+            return 0;
+        case 49:
+            return 1;
+        case 50:
+            return 2;
+        case 51:
+            return 3;
+        case 52:
+            return 4;
+        case 53:
+            return 5;
+        case 54:
+            return 6;
+        case 55:
+            return 7;
+        case 56:
+            return 8;
+        case 57:
+            return 9;
+        default: 
+            return 999;
+        }
+}
+
+//Allows the user to change colors by typing in RGB values
+int colorCheck() {
+    int colorz= 0; //Initialize RGB array
+    int noEnter = 1;
+    int vals = 0;
+    
+        pc.printf("Input your value (0-255), then press 'Enter'\n\r");
+        while(noEnter) {
+            int a = getc(stdin);
+            a = keyPresses(a);
+            if(a!=13){
+                pc.printf("%d",a);
+            }
+            if (a==13){
+                noEnter = 0;
+                pc.printf("\n\r");
+                break;
+            }
+            vals*=10; //Prepares for next value
+            vals += a;
+        }
+        pc.printf("\n\r");
+        colorz = vals;
+    
+    
+    //Test to ensure number is between the necessary values (0 to 255)
+    if (colorz>255 || colorz<0) {
+        pc.printf("This number is not between 0 and 255\n\r");
+        colorz = 0;
+    }
+    
+    return colorz;
+}
+
+
+int main()
+{
+    strip.begin();
+    for(int z=0;z<nLEDs;z++){
+        strip.setPixelColor(z,0,0,0);
+    }
+    strip.show();
+    pc.baud(115200);
+    
+    while(1) {
+      int noEnter = 1;
+      int vals = 0;
+      pc.printf("Enter LED number to modify (1 to %d), then press 'Enter':\n\r",nLEDs);
+      while(noEnter) {
+            
+            int c = getc(stdin);
+            c = keyPresses(c);
+            if(c!=13){
+                pc.printf("%d",c);
+            }
+            if (c==13){
+                noEnter = 0;
+                pc.printf("\n\r");
+                break;
+            }
+            vals*=10; //Prepares for next value
+            vals += c;
+        }
+      outKey = vals;
+      
+     if(outKey>0 && outKey<=nLEDs){ 
+      int i = outKey-1;
+      
+      //Sets the color for the chosen LED
+      int C1 = colorCheck(); //R
+      int C2 = colorCheck(); //G
+      int C3 = colorCheck(); //B
+      //int C1 = 255; //R
+      //int C2 = 0; //G
+      //int C3 = 0; //B
+      strip.setPixelColor(i,C1,C2,C3);
+      
+      //Fills in the buffer for all LEDs before the chosen number
+      for(int j=0;j<i;j++) {
+          strip.setPixelColor(j,0,0,0);
+      }
+      //Fills in the buffer for all LEDs after the chosen number
+      for(int j=i+1;j<nLEDs;j++) {
+          strip.setPixelColor(j,0,0,0);
+      }
+      
+      strip.show(); //Sets the color values
+      
+      pc.printf("LED %d, R: %d, G: %d, B: %d\n\r",outKey,C1,C2,C3); //LED being lit up and its RGB values
+    }
+    //If the keypress is not one of the options
+    else{
+        pc.printf("This is not a number in the range\n\r");
+    }
+    
+    }
+}
